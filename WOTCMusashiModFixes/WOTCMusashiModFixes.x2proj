@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Guid>15dcbfdc-676e-4e27-b3c1-c6c996434f27</Guid>
+    <Name>WOTCMusashiModFixes</Name>
+    <Description>This mod fixes various bugs in Musashi's mods, such as RPG Overhaul, True Primary Secondaries and Ability to Slot Reassignment.</Description>
+    <SteamPublishID>0</SteamPublishID>
+    <AssemblyName>WOTCMusashiModFixes</AssemblyName>
+    <RootNamespace>WOTCMusashiModFixes</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
+    <Folder Include="Config\Base" />
+    <Folder Include="Src\" />
+    <Folder Include="Src\WOTCMusashiModFixes\" />
+    <Folder Include="Src\WOTCMusashiModFixes\Classes\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\Base\XComEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Base\XComEngine.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Base\XComGame.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComAbilityToSlotReassignment.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ReadMe.txt" />
+    <Content Include="ModPreview.jpg" />
+    <Content Include="Src\WOTCMusashiModFixes\Classes\X2DLCInfo_WOTCMusashiModFixes.uc" />
+  </ItemGroup>
+  <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
+</Project>
