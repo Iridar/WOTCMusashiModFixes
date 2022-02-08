@@ -1,0 +1,10 @@
+[WOTCMusashiModFixes_MCMScreen]
+ModName = "Musashi's Mods Fixes"
+PageTitle = "Musashi's Mods Fixes"
+GroupHeader = "General Settings"
+
+SHOW_VALID_WEAPON_CATEGORIES_Label = "Show valid weapon categories for configured abilities"
+SHOW_VALID_WEAPON_CATEGORIES_Tip = "If this setting is enabled, the mod will automatically display valid weapon categories for abilities affected by Ability to Slot Reassignment. This information can be crucial, because the ability will be removed from the unit when they enter combat if they don't have a valid weapon for it. Changing this option requires a restart in order to take effect."
+
+DEBUG_LOGGING_Label = "Enable debug logging"
+DEBUG_LOGGING_Tip = "If enabled, the mod will print debug messages into the log file, located at:\n..\\Documents\\my games\\XCOM2 War of the Chosen\\XComGame\\Logs\\Launch.log"

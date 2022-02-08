@@ -12,7 +12,11 @@ var config(AbilityToSlotReassignment) bool bLog;
 var private class<X2DownloadableContentInfo> DLCInfo_TPS;
 var private class<X2DownloadableContentInfo> DLCInfo_RPGO;
 
-`define LLOG(msg) `LOG(GetFuncName() @ `msg, default.bLog, 'AtSR_Fixes')
+var private config array<name> AbilitiesWithUpdatedLocalization;
+
+`define LLOG(msg) `LOG(GetFuncName() @ `msg, class'WOTCMusashiModFixes_Defaults'.default.VERSION_CFG > class'WOTCMusashiModFixes_MCMScreen'.default.VERSION_CFG ? class'WOTCMusashiModFixes_Defaults'.default.DEBUG_LOGGING : class'WOTCMusashiModFixes_MCMScreen'.default.DEBUG_LOGGING, 'AtSR_Fixes')
+
+`include(WOTCMusashiModFixes\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
 static event OnPostTemplatesCreated()
 {
@@ -37,7 +41,10 @@ static event OnPostTemplatesCreated()
 
 		// If an ability requires specific weapon categories,
 		// add these categories to its description.
-		UpdateAbilityLocalization();
+		if (`GETMCMVAR(SHOW_VALID_WEAPON_CATEGORIES))
+		{
+			UpdateAbilityLocalization();
+		}
 	}
 }
 
@@ -401,16 +408,25 @@ private static function UpdateAbilityLocalization()
 {
 	local X2AbilityTemplateManager	Mgr;
 	local X2AbilityTemplate			AbilityTemplate;
+	local name						AbilityName;
 	local int i;
 
 	Mgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
 
 	for (i = class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.Length - 1; i >= 0; i--)
 	{
-		AbilityTemplate = Mgr.FindAbilityTemplate(class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].AbilityName);
-		if (AbilityTemplate != none)
+		AbilityName = class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].AbilityName;
+		if (default.AbilitiesWithUpdatedLocalization.Find(AbilityName) == INDEX_NONE)
 		{
-			AbilityTemplate.LocLongDescription $= "\n" $ GetLocalizedCategoriesFromWeaponSet(class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].WeaponCategorySetName);
+			AbilityTemplate = Mgr.FindAbilityTemplate(AbilityName);
+
+			if (AbilityTemplate != none)
+			{
+				AbilityTemplate.LocLongDescription $= "\n" $ GetLocalizedCategoriesFromWeaponSet(class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].WeaponCategorySetName);
+			}
+
+			// Make sure localization is updated for each ability only once.
+			default.AbilitiesWithUpdatedLocalization.AddItem(AbilityName);
 		}
 	}
 }
@@ -421,11 +437,11 @@ private static function string GetLocalizedCategoriesFromWeaponSet(const name We
 	local int i;
 	local int j;
 
-	for (i = class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets.Length - 1; i >= 0; i--)
+	for (i = 0; i < class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets.Length; i++)
 	{
 		if (class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets[i].WeaponCategorySetName == WeaponCategorySetName)
 		{
-			for (j = class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets[i].WeaponCategories.Length - 1; j >= 0; j--)
+			for (j = 0; j < class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets[i].WeaponCategories.Length; j++)
 			{
 				// Add a comma before a new weapon cat entry if this is not a first weapon cat being added.
 				if (ReturnString != "")
@@ -458,11 +474,11 @@ private static function string GetFriendlyNameForWeaponCat(const name WeaponCat)
 			FriendlyName = WeaponTemplate.GetLocalizedCategory();
 			if (FriendlyName != class'XGLocalizedData'.default.WeaponCatUnknown)
 			{
-				return FriendlyName;
+				return Locs(FriendlyName);
 			}
 		}
 	}
-	return string(WeaponCat);
+	return Locs(Repl(string(WeaponCat), "_", " "));
 }
 
 // ============================================================================================================
