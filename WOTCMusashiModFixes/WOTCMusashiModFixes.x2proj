@@ -31,6 +31,9 @@
     <Content Include="Config\XComAbilityToSlotReassignment.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Config\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComWOTCMusashiModFixes_DEFAULT.ini">
       <SubType>Content</SubType>
     </Content>
@@ -91,6 +94,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCMusashiModFixes\Classes\X2DLCInfo_WOTCMusashiModFixes.uc" />
+    <Content Include="Src\WOTCMusashiModFixes\Classes\X2EventListener_BallisticShieldsFix.uc">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
 </Project>
