@@ -574,7 +574,7 @@ static private function string GetLocalizedCategoriesFromWeaponSet(const name We
 				{
 					ReturnString $= ", ";
 				}
-				ReturnString $= GetFriendlyNameForWeaponCat(class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets[i].WeaponCategories[j]);
+				ReturnString $= Locs(GetFriendlyNameForWeaponCat(class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets[i].WeaponCategories[j]));
 			}
 			// WeaponCategorySetName entries should be unique at this point.
 			break;
@@ -585,26 +585,122 @@ static private function string GetLocalizedCategoriesFromWeaponSet(const name We
 
 static private function string GetFriendlyNameForWeaponCat(const name WeaponCat)
 {
-	local X2ItemTemplateManager	Mgr;
-	local X2WeaponTemplate		WeaponTemplate;
-	local X2DataTemplate		DataTemplate;
-	local string				FriendlyName;
+	local X2ItemTemplateManager		ItemMgr;
+	local X2WeaponTemplate			WeaponTemplate;
+	local X2DataTemplate			DataTemplate;
+	local X2ItemTemplate			ItemTemplate;
+	local string					LocCat;
 
-	Mgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
+	ItemMgr = class'X2ItemTemplateManager'.static.GetItemTemplateManager();
 
-	foreach Mgr.IterateTemplates(DataTemplate)
+	// Use in-game item localization for unlocalized base game weapon cats.
+	switch (WeaponCat)
+	{
+		case 'utility':
+			return class'UIArmory_Loadout'.default.m_strInventoryLabels[eInvSlot_Utility];
+		case 'heavy':
+			return class'UIArmory_Loadout'.default.m_strInventoryLabels[eInvSlot_HeavyWeapon];
+		case 'grenade_launcher':
+			ItemTemplate = ItemMgr.FindItemTemplate('GrenadeLauncher_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'gremlin':
+			ItemTemplate = ItemMgr.FindItemTemplate('Gremlin_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'vektor_rifle':
+			ItemTemplate = ItemMgr.FindItemTemplate('VektorRifle_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'bullpup':
+			ItemTemplate = ItemMgr.FindItemTemplate('Bullpup_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'claymore':
+			ItemTemplate = ItemMgr.FindItemTemplate('Reaper_Claymore');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'rifle':
+			ItemTemplate = ItemMgr.FindItemTemplate('AssaultRifle_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'shotgun':
+			ItemTemplate = ItemMgr.FindItemTemplate('Shotgun_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'pistol':
+			ItemTemplate = ItemMgr.FindItemTemplate('Pistol_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'cannon':
+			ItemTemplate = ItemMgr.FindItemTemplate('Sword_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'sword':
+			ItemTemplate = ItemMgr.FindItemTemplate('WristBlade_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'sniper_rifle':
+			ItemTemplate = ItemMgr.FindItemTemplate('SniperRifle_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'wristblade':
+			ItemTemplate = ItemMgr.FindItemTemplate('WristBlade_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName;
+			break;
+		case 'gauntlet':
+			ItemTemplate = ItemMgr.FindItemTemplate('ShardGauntlet_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName; // "Shard Gauntlets"
+			break;
+		case 'sparkbit':
+			ItemTemplate = ItemMgr.FindItemTemplate('SparkBit_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName; // "SPARK BIT"
+			break;
+		case 'psiamp':
+			ItemTemplate = ItemMgr.FindItemTemplate('PsiAmp_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName; // "Psi Amp"
+			break;
+		case 'sidearm':
+			ItemTemplate = ItemMgr.FindItemTemplate('Sidearm_CV');
+			if (ItemTemplate != none)
+				return ItemTemplate.FriendlyName; // "Psi Amp"
+			break;
+		default:
+			break;
+	}
+
+	// For mod-added categories, search for the first weapon template with that category,
+	// and use its GetLocalizedCategoryMethod, which will trigger a CHL event.
+	foreach ItemMgr.IterateTemplates(DataTemplate)
 	{
 		WeaponTemplate = X2WeaponTemplate(DataTemplate);
 		if (WeaponTemplate != none && WeaponTemplate.WeaponCat == WeaponCat)
 		{
-			FriendlyName = WeaponTemplate.GetLocalizedCategory();
-			if (FriendlyName != class'XGLocalizedData'.default.WeaponCatUnknown)
-			{
-				return Locs(FriendlyName);
-			}
+			LocCat = WeaponTemplate.GetLocalizedCategory();
+			break;
 		}
 	}
-	return Locs(Repl(string(WeaponCat), "_", " "));
+	// If all else fails, default to weapon category itself.
+	if (LocCat == class'XGLocalizedData'.default.WeaponCatUnknown)
+	{	
+		return Repl(string(WeaponCat), "_", " ");
+	}
+	return LocCat;
 }
 
 // ============================================================================================================
