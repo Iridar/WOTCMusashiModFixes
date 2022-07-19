@@ -1,0 +1,13 @@
+[WOTCMusashiModFixes_MCMScreen]
+ModName = "Musashi's Mods Fixes"
+PageTitle = "Musashi's Mods Fixes by Iridar"
+GroupHeader = "Основные настройки"
+
+SHOW_VALID_WEAPON_CATEGORIES_Label = "Показывать доступные категории оружия для способностей"
+SHOW_VALID_WEAPON_CATEGORIES_Tip = "Если включено, способности, настроенные с помощью Ability to Slot Reassignment, будут отображать список категорий оружия, с которыми их можно использовать. После изменения этой настройки нужно перезапустить игру."
+
+DEBUG_LOGGING_Label = "Режим отладки"
+DEBUG_LOGGING_Tip = "Если включено, мод будет писать сообщения для отладки в лог-файл:\n..\\Documents\\my games\\XCOM2 War of the Chosen\\XComGame\\Logs\\Launch.log"
+
+LabelEnd = "Автор: Иридар | www.sponsr.ru/Iridar"
+LabelEndTooltip = "Спасибо, что используете мои моды, надеюсь вам всё нравится. Приходите поддержать меня на Sponsr.ru. Становитесь подписчиком - и будем создавать крутые моды вместе. <3")

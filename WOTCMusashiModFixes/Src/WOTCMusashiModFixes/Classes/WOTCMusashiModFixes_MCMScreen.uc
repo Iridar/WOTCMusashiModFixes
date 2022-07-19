@@ -5,6 +5,9 @@ var config int VERSION_CFG;
 var localized string ModName;
 var localized string PageTitle;
 var localized string GroupHeader;
+var localized string LabelEnd;
+var localized string LabelEndTooltip;
+
 
 `include(WOTCMusashiModFixes\Src\ModConfigMenuAPI\MCM_API_Includes.uci)
 
@@ -39,7 +42,7 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	`MCM_API_AutoAddCheckBox(Group, SHOW_VALID_WEAPON_CATEGORIES);	
 	`MCM_API_AutoAddCheckBox(Group, DEBUG_LOGGING);
 
-	Group.AddLabel('Label_End', "Created by Iridar | www.patreon.com/Iridar", "Thank you for using my mods, I hope you enjoy! Please consider supporting me at Patreon so I can afford the time to make more awesome mods <3");
+	Group.AddLabel('Label_End', LabelEnd, LabelEndTooltip);
 
 	Page.ShowSettings();
 }

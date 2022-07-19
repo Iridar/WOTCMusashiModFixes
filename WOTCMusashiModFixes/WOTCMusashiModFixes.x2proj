@@ -3,7 +3,9 @@
   <PropertyGroup>
     <Guid>15dcbfdc-676e-4e27-b3c1-c6c996434f27</Guid>
     <Name>WOTCMusashiModFixes</Name>
-    <Description>This mod fixes various bugs in Musashi's mods, such as RPG Overhaul, True Primary Secondaries and Ability to Slot Reassignment.</Description>
+    <Description>This mod fixes various bugs in Musashi's mods, such as RPG Overhaul, True Primary Secondaries and Ability to Slot Reassignment.
+
+tags= war of the chosen</Description>
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>WOTCMusashiModFixes</AssemblyName>
     <RootNamespace>WOTCMusashiModFixes</RootNamespace>
@@ -38,6 +40,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Localization\WOTCMusashiModFixes.int">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\WOTCMusashiModFixes.rus">
       <SubType>Content</SubType>
     </Content>
     <Content Include="ReadMe.txt" />

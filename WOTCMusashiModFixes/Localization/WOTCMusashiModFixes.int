@@ -1,6 +1,6 @@
 [WOTCMusashiModFixes_MCMScreen]
 ModName = "Musashi's Mods Fixes"
-PageTitle = "Musashi's Mods Fixes"
+PageTitle = "Musashi's Mods Fixes by Iridar"
 GroupHeader = "General Settings"
 
 SHOW_VALID_WEAPON_CATEGORIES_Label = "Show valid weapon categories for configured abilities"
@@ -8,3 +8,6 @@ SHOW_VALID_WEAPON_CATEGORIES_Tip = "If this setting is enabled, the mod will aut
 
 DEBUG_LOGGING_Label = "Enable debug logging"
 DEBUG_LOGGING_Tip = "If enabled, the mod will print debug messages into the log file, located at:\n..\\Documents\\my games\\XCOM2 War of the Chosen\\XComGame\\Logs\\Launch.log"
+
+LabelEnd = "Created by Iridar | www.patreon.com/Iridar"
+LabelEndTooltip = "Thank you for using my mods, I hope you enjoy! Please consider supporting me at Patreon so I can afford the time to make more awesome mods <3")

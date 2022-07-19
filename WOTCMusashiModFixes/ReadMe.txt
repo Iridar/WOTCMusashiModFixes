@@ -7,7 +7,8 @@ More info here: https://www.patreon.com/Iridar
 Fixes various issues with Musashi's mods:[list]
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1280477867][b]Musashi's RPG Overhaul[/b][/url]
 [*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2133399183]True Primary Secondaries[/url][/b]
-[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2133397762]Ability To Slot Reassignment[/url][/b][/list]
+[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2133397762]Ability To Slot Reassignment[/url][/b]
+[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1416242202]WotC Ballistic Shields[/url][/b][/list]
 
 If you're using at least one of these mods, make sure to subscribe to this fix to prevent gamebreaking bugs from happening. If you don't have any of these mods, it's still completely safe to subscribe to this mod; it will simply not do anything. 
 
@@ -25,7 +26,13 @@ If you are a modmaker, and you have ever used the [b]CanAddItemToInventory_CH[/b
 [*] It's now possible to have multiple [b][i]WeaponCategorySets[/i][/b] entries for each weapon set.
 [*] Multiple [b][i]AbilityWeaponCategories[/i][/b] and [b][i]MandatoryAbilities[/i][/b] entries for the same ability name and different weapon category set are now allowed.
 [*] [b][i]OverrideAbilities[/i][/b] array is now available for both [b][i]AbilityWeaponCategories[/i][/b] and [b][i]MandatoryAbilities[/i][/b]. Current use case is replacing [b][i]SwordSlice[/i][/b] with [b][i]SwordSlice_LW[/i][/b] as a mandatory ability, if it is available.
-[*] Valid weapon categories for each configured ability will now be listed in ability description.[/list]
+[*] Additional Abilities to Mandatory Abilities and Ability Weapon Categories will now be automatically added into their respective arrays.
+[*] Launch Grenade is now correctly assigned to grenade items.
+[*] Valid weapon categories for each configured ability will now be listed in ability description (MCM configurable).[/list]
+
+[h1]Ballistic Shields[/h1]
+[list][*] Primary Sawed Off Shotguns will now animate correctly with Ballistic Shields, if you have another mod that allows equipping them. [b]IMPORTANT: This fix requires [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2363075446]Template Master[/url].[/b]
+[*] Non-SPARK Ballistic Shields will now use the correct localized category.[/list]
 
 [h1]CONTRIBUTIONS[/h1]
 

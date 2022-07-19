@@ -14,7 +14,6 @@ static function FinalizeUnitAbilitiesForInit(XComGameState_Unit UnitState, out a
 	local array<name>				WeaponCategories;
 	local name						WeaponCategory;
 	local int Index;
-	local int i;
 	local int j;
 
 	// Don't process if the unit already has Launch Grenade as class ability, then base game ability init will handle it.

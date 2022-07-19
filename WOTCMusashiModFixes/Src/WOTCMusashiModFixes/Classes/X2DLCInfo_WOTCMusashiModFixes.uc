@@ -615,10 +615,15 @@ static private function string GetFriendlyNameForWeaponCat(const name WeaponCat)
 			if (ItemTemplate != none)
 				return ItemTemplate.FriendlyName;
 			break;
-		case 'bullpup':
-			ItemTemplate = ItemMgr.FindItemTemplate('Bullpup_CV');
+		//case 'bullpup':
+		//	ItemTemplate = ItemMgr.FindItemTemplate('Bullpup_CV'); 
+		//	if (ItemTemplate != none)
+		//		return ItemTemplate.FriendlyName; "Kal-7 Bullpup" ugh
+		//	break;
+		case 'sparkrifle':
+			ItemTemplate = ItemMgr.FindItemTemplate('SparkRifle_CV');
 			if (ItemTemplate != none)
-				return ItemTemplate.FriendlyName;
+				return ItemTemplate.FriendlyName; // "Heavy Autocannon"
 			break;
 		case 'claymore':
 			ItemTemplate = ItemMgr.FindItemTemplate('Reaper_Claymore');
