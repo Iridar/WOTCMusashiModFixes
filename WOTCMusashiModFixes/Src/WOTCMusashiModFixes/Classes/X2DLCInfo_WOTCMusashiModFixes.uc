@@ -1,5 +1,7 @@
 class X2DLCInfo_WOTCMusashiModFixes extends X2DownloadableContentInfo;
 
+// This DLC Info runs *before* AtSR.
+
 struct AbilityOverrideStruct
 {
 	var name AbilityName;
