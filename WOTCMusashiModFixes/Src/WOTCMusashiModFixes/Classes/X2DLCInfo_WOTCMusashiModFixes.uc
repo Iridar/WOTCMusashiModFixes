@@ -101,7 +101,7 @@ static private function InsertAdditionalAbilitiesRecursive(const name MandatoryA
 	local X2AbilityTemplate		MandatoryAbilityTemplate;
 	local X2AbilityTemplate		AdditionalAbilityTemplate;
 	local name					AdditionalAbilityName;
-	local AbilityWeaponCategory MandatoryAbilityEntry;
+	local int					LastElementIndex;
 
 	MandatoryAbilityTemplate = Mgr.FindAbilityTemplate(MandatoryAbilityName);
 	if (MandatoryAbilityTemplate != none)
@@ -111,12 +111,12 @@ static private function InsertAdditionalAbilitiesRecursive(const name MandatoryA
 			AdditionalAbilityTemplate = Mgr.FindAbilityTemplate(AdditionalAbilityName);
 			if (AdditionalAbilityTemplate != none)
 			{
-				MandatoryAbilityEntry.AbilityName = AdditionalAbilityName;
-				MandatoryAbilityEntry.WeaponCategorySetName = WeaponSetName;
-
-				if (!DoesMandatoryAbilityEntryExist(MandatoryAbilityEntry))
+				if (!DoesMandatoryAbilityEntryExist(AdditionalAbilityName, WeaponSetName))
 				{
-					class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities.AddItem(MandatoryAbilityEntry);
+					LastElementIndex = class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities.Length;
+					class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities.Add(1);
+					class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[LastElementIndex].AbilityName = AdditionalAbilityName;
+					class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[LastElementIndex].WeaponCategorySetName = WeaponSetName;
 				}
 				InsertAdditionalAbilitiesRecursive(AdditionalAbilityName, WeaponSetName, Mgr);
 			}
@@ -124,14 +124,14 @@ static private function InsertAdditionalAbilitiesRecursive(const name MandatoryA
 	}
 }
 
-static private function bool DoesMandatoryAbilityEntryExist(AbilityWeaponCategory MandatoryAbilityEntry)
+static private function bool DoesMandatoryAbilityEntryExist(const name MandatoryAbilityName, const name WeaponSetName)
 {
 	local int i;
 
 	for (i = class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities.Length - 1; i >= 0; i--)
 	{	
-		if (class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].AbilityName == MandatoryAbilityEntry.AbilityName &&
-			class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].WeaponCategorySetName == MandatoryAbilityEntry.WeaponCategorySetName)
+		if (class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].AbilityName == MandatoryAbilityName &&
+			class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].WeaponCategorySetName == WeaponSetName)
 		{
 			return true;
 		}
@@ -160,7 +160,7 @@ static private function InsertAdditionalAbilityWeaponCatRecursive(const name Abi
 	local X2AbilityTemplate		AbilityWeaponCatTemplate;
 	local X2AbilityTemplate		AdditionalAbilityTemplate;
 	local name					AdditionalAbilityName;
-	local AbilityWeaponCategory AbilityWeaponCatEntry;
+	local int LastElementIndex;
 
 	AbilityWeaponCatTemplate = Mgr.FindAbilityTemplate(AbilityWeaponCatName);
 	if (AbilityWeaponCatTemplate != none)
@@ -170,12 +170,13 @@ static private function InsertAdditionalAbilityWeaponCatRecursive(const name Abi
 			AdditionalAbilityTemplate = Mgr.FindAbilityTemplate(AdditionalAbilityName);
 			if (AdditionalAbilityTemplate != none)
 			{
-				AbilityWeaponCatEntry.AbilityName = AdditionalAbilityName;
-				AbilityWeaponCatEntry.WeaponCategorySetName = WeaponSetName;
 
-				if (!DoesAbilityWeaponCatEntryExist(AbilityWeaponCatEntry))
+				if (!DoesAbilityWeaponCatEntryExist(AdditionalAbilityName, WeaponSetName))
 				{
-					class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.AddItem(AbilityWeaponCatEntry);
+					LastElementIndex = class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.Length;
+					class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.Add(1);
+					class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[LastElementIndex].AbilityName = AdditionalAbilityName;
+					class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[LastElementIndex].WeaponCategorySetName = WeaponSetName;
 				}
 				InsertAdditionalAbilityWeaponCatRecursive(AdditionalAbilityName, WeaponSetName, Mgr);
 			}
@@ -183,14 +184,14 @@ static private function InsertAdditionalAbilityWeaponCatRecursive(const name Abi
 	}
 }
 
-static private function bool DoesAbilityWeaponCatEntryExist(AbilityWeaponCategory AbilityWeaponCatEntry)
+static private function bool DoesAbilityWeaponCatEntryExist(const name AbilityName, const name WeaponSetName)
 {
 	local int i;
 
 	for (i = class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.Length - 1; i >= 0; i--)
 	{	
-		if (class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].AbilityName == AbilityWeaponCatEntry.AbilityName &&
-			class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].WeaponCategorySetName == AbilityWeaponCatEntry.WeaponCategorySetName)
+		if (class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].AbilityName == AbilityName &&
+			class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].WeaponCategorySetName == WeaponSetName)
 		{
 			return true;
 		}

@@ -16,6 +16,9 @@ static function FinalizeUnitAbilitiesForInit(XComGameState_Unit UnitState, out a
 	local int Index;
 	local int j;
 
+	if (!IsModActive('AbilityToSlotReassignment'))
+		return;
+
 	// Don't process if the unit already has Launch Grenade as class ability, then base game ability init will handle it.
 	if (!IsLaunchGrenadeMandatory() || UnitState.HasSoldierAbility('LaunchGrenade'))
 		return;
@@ -83,4 +86,21 @@ static private function bool IsLaunchGrenadeMandatory()
 			return true;
 	}
 	return false;
+}
+
+static private final function bool IsModActive(name ModName)
+{
+    local XComOnlineEventMgr    EventManager;
+    local int                   Index;
+
+    EventManager = `ONLINEEVENTMGR;
+
+    for (Index = EventManager.GetNumDLC() - 1; Index >= 0; Index--) 
+    {
+        if (EventManager.GetDLCNames(Index) == ModName) 
+        {
+            return true;
+        }
+    }
+    return false;
 }
