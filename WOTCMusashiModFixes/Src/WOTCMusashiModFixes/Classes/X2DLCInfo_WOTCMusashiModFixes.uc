@@ -32,8 +32,10 @@ static event OnPostTemplatesCreated()
 		CompileAbilityWeaponCategories();
 		CompileWeaponCategorySets(); // Repeat in case CompileAbilityWeaponCategories() created duplicates.
 
+		AddAdditionalMandatoryAbilities();
+		AddAdditionalAbilityWeaponCategories();
 		PerformOverrideAbilities();
-
+		
 		// Remove entries that reference abilities that are not currently present in the game.
 		ValidateAbilities();
 		ValidateWeaponCategories();
@@ -48,7 +50,7 @@ static event OnPostTemplatesCreated()
 	}
 }
 
-private static function PerformOverrideAbilities()
+static private function PerformOverrideAbilities()
 {
 	local name OverrideAbility;
 	local int i;
@@ -74,7 +76,129 @@ private static function PerformOverrideAbilities()
 	}
 }
 
-private static function name GetOverrideAbility(const name AbilityName)
+// ------------------------------------------------------------------------------------------
+// If a Mandatory Ability has Additional Abilities specified in its template, make those additional abilities mandatory as well.
+// ...and additional abilities of those additional abilities, ad infinitum.
+
+static private function AddAdditionalMandatoryAbilities()
+{
+	local X2AbilityTemplateManager Mgr;
+	local int i;
+
+	Mgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+
+	for (i = class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities.Length - 1; i >= 0; i--)
+	{	
+		InsertAdditionalAbilitiesRecursive(class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].AbilityName, 
+										   class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].WeaponCategorySetName, Mgr);
+	}
+}
+
+static private function InsertAdditionalAbilitiesRecursive(const name MandatoryAbilityName, const name WeaponSetName, X2AbilityTemplateManager Mgr)
+{
+	local X2AbilityTemplate		MandatoryAbilityTemplate;
+	local X2AbilityTemplate		AdditionalAbilityTemplate;
+	local name					AdditionalAbilityName;
+	local AbilityWeaponCategory MandatoryAbilityEntry;
+
+	MandatoryAbilityTemplate = Mgr.FindAbilityTemplate(MandatoryAbilityName);
+	if (MandatoryAbilityTemplate != none)
+	{
+		foreach MandatoryAbilityTemplate.AdditionalAbilities(AdditionalAbilityName)
+		{
+			AdditionalAbilityTemplate = Mgr.FindAbilityTemplate(AdditionalAbilityName);
+			if (AdditionalAbilityTemplate != none)
+			{
+				MandatoryAbilityEntry.AbilityName = AdditionalAbilityName;
+				MandatoryAbilityEntry.WeaponCategorySetName = WeaponSetName;
+
+				if (!DoesMandatoryAbilityEntryExist(MandatoryAbilityEntry))
+				{
+					class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities.AddItem(MandatoryAbilityEntry);
+				}
+				InsertAdditionalAbilitiesRecursive(AdditionalAbilityName, WeaponSetName, Mgr);
+			}
+		}
+	}
+}
+
+static private function bool DoesMandatoryAbilityEntryExist(AbilityWeaponCategory MandatoryAbilityEntry)
+{
+	local int i;
+
+	for (i = class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities.Length - 1; i >= 0; i--)
+	{	
+		if (class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].AbilityName == MandatoryAbilityEntry.AbilityName &&
+			class'AbilityToSlotReassignmentLib'.default.MandatoryAbilities[i].WeaponCategorySetName == MandatoryAbilityEntry.WeaponCategorySetName)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Now do the same for ability weapon categories array.. zzz....
+static private function AddAdditionalAbilityWeaponCategories()
+{
+	local X2AbilityTemplateManager Mgr;
+	local int i;
+
+	Mgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+
+	for (i = class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.Length - 1; i >= 0; i--)
+	{	
+		InsertAdditionalAbilityWeaponCatRecursive(class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].AbilityName, 
+												  class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].WeaponCategorySetName, Mgr);
+	}
+}
+
+static private function InsertAdditionalAbilityWeaponCatRecursive(const name AbilityWeaponCatName, const name WeaponSetName, X2AbilityTemplateManager Mgr)
+{
+	local X2AbilityTemplate		AbilityWeaponCatTemplate;
+	local X2AbilityTemplate		AdditionalAbilityTemplate;
+	local name					AdditionalAbilityName;
+	local AbilityWeaponCategory AbilityWeaponCatEntry;
+
+	AbilityWeaponCatTemplate = Mgr.FindAbilityTemplate(AbilityWeaponCatName);
+	if (AbilityWeaponCatTemplate != none)
+	{
+		foreach AbilityWeaponCatTemplate.AdditionalAbilities(AdditionalAbilityName)
+		{
+			AdditionalAbilityTemplate = Mgr.FindAbilityTemplate(AdditionalAbilityName);
+			if (AdditionalAbilityTemplate != none)
+			{
+				AbilityWeaponCatEntry.AbilityName = AdditionalAbilityName;
+				AbilityWeaponCatEntry.WeaponCategorySetName = WeaponSetName;
+
+				if (!DoesAbilityWeaponCatEntryExist(AbilityWeaponCatEntry))
+				{
+					class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.AddItem(AbilityWeaponCatEntry);
+				}
+				InsertAdditionalAbilityWeaponCatRecursive(AdditionalAbilityName, WeaponSetName, Mgr);
+			}
+		}
+	}
+}
+
+static private function bool DoesAbilityWeaponCatEntryExist(AbilityWeaponCategory AbilityWeaponCatEntry)
+{
+	local int i;
+
+	for (i = class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories.Length - 1; i >= 0; i--)
+	{	
+		if (class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].AbilityName == AbilityWeaponCatEntry.AbilityName &&
+			class'AbilityToSlotReassignmentLib'.default.AbilityWeaponCategories[i].WeaponCategorySetName == AbilityWeaponCatEntry.WeaponCategorySetName)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+// =====================================================================================================================
+
+static private function name GetOverrideAbility(const name AbilityName)
 {
 	local int i;
 
@@ -89,7 +213,7 @@ private static function name GetOverrideAbility(const name AbilityName)
 	return '';
 }
 
-private static function ValidateWeaponCategorySets()
+static private function ValidateWeaponCategorySets()
 {
 	local int i;
 
@@ -112,7 +236,7 @@ private static function ValidateWeaponCategorySets()
 	}
 }
 
-private static function bool IsWeaponCategorySetValid(const name WeaponCategorySetName)
+static private function bool IsWeaponCategorySetValid(const name WeaponCategorySetName)
 {
 	local int i;
 
@@ -127,7 +251,7 @@ private static function bool IsWeaponCategorySetValid(const name WeaponCategoryS
 	return false;
 }
 
-private static function ValidateWeaponCategories()
+static private function ValidateWeaponCategories()
 {
 	local int i;
 	local int j;
@@ -151,7 +275,7 @@ private static function ValidateWeaponCategories()
 	}
 }
 
-private static function bool IsWeaponCategoryValid(const name WeaponCat)
+static private function bool IsWeaponCategoryValid(const name WeaponCat)
 {
 	local X2ItemTemplateManager	Mgr;
 	local X2WeaponTemplate		WeaponTemplate;
@@ -170,7 +294,7 @@ private static function bool IsWeaponCategoryValid(const name WeaponCat)
 	return false;
 }
 
-private static function ValidateAbilities()
+static private function ValidateAbilities()
 {
 	local int i;
 
@@ -193,7 +317,7 @@ private static function ValidateAbilities()
 	}	
 }
 
-private static function bool IsAbilityValid(const name TemplateName)
+static private function bool IsAbilityValid(const name TemplateName)
 {
 	local X2AbilityTemplateManager Mgr;
 	local X2AbilityTemplate AbilityTemplate;
@@ -208,7 +332,7 @@ private static function bool IsAbilityValid(const name TemplateName)
 
 
 // Latest default config in ASR has a lot of typos and other issues, this fixes them.
-private static function FixDefaultConfigEntries()
+static private function FixDefaultConfigEntries()
 {
 	local int i;
 	local int j;
@@ -285,7 +409,7 @@ public static function array<name> GetWeaponCategoriesFromSet(name WeaponCategor
 */
 // To address the issue, I compile all WeaponCategorySets entries to make sure each unique SetName appears only once, 
 // and Weapon Categories entries from other entries with the matching SetName are added into it.
-private static function CompileWeaponCategorySets()
+static private function CompileWeaponCategorySets()
 {
 	local name SetName;
 	local name WeaponCat;
@@ -330,7 +454,7 @@ ConfigIndex = default.AbilityWeaponCategories.Find('AbilityName', SetupData[Inde
 // To address this, I collect all AbilityWeaponCategories for each unique AbilityName,
 // and create a new WeaponSet, with a new SetName unique to this ability.
 // The new WeaponSet will contain weapon categories from all Sets assigned to this AbilityName.
-private static function CompileAbilityWeaponCategories()
+static private function CompileAbilityWeaponCategories()
 {	
 	local name AbilityName;
 	local name SetName;
@@ -372,7 +496,7 @@ private static function CompileAbilityWeaponCategories()
 	}
 }
 
-private static function name CompileWeaponSetsForAbility(const name AbilityName, const array<name> SetNamesToCompile)
+static private function name CompileWeaponSetsForAbility(const name AbilityName, const array<name> SetNamesToCompile)
 {
 	local array<name> CompiledWeaponCategories;
 	local name WeaponCat;
@@ -404,7 +528,7 @@ private static function name CompileWeaponSetsForAbility(const name AbilityName,
 	return class'AbilityToSlotReassignmentLib'.default.WeaponCategorySets[Index].WeaponCategorySetName;
 }
 
-private static function UpdateAbilityLocalization()
+static private function UpdateAbilityLocalization()
 {
 	local X2AbilityTemplateManager	Mgr;
 	local X2AbilityTemplate			AbilityTemplate;
@@ -431,7 +555,7 @@ private static function UpdateAbilityLocalization()
 	}
 }
 
-private static function string GetLocalizedCategoriesFromWeaponSet(const name WeaponCategorySetName)
+static private function string GetLocalizedCategoriesFromWeaponSet(const name WeaponCategorySetName)
 {
 	local string ReturnString;
 	local int i;
@@ -457,7 +581,7 @@ private static function string GetLocalizedCategoriesFromWeaponSet(const name We
 	return class'UIUtilities_Text'.static.GetColoredText(ReturnString, eUIState_Warning); // Yellow color.
 }
 
-private static function string GetFriendlyNameForWeaponCat(const name WeaponCat)
+static private function string GetFriendlyNameForWeaponCat(const name WeaponCat)
 {
 	local X2ItemTemplateManager	Mgr;
 	local X2WeaponTemplate		WeaponTemplate;
@@ -486,7 +610,7 @@ private static function string GetFriendlyNameForWeaponCat(const name WeaponCat)
 // ------------------------------------------------------------------------------------------------------------
 
 // Caching cuz GetClassByName is intense.
-private static function CacheCDOs()
+static private function CacheCDOs()
 {
 	local X2DLCInfo_WOTCMusashiModFixes CDO;
 
@@ -598,7 +722,7 @@ static event OnLoadedSavedGame()
 //			HELPERS
 // ------------------------------------------------------------------------------------------------------------
 
-private static final function bool IsModActive(name ModName)
+static private final function bool IsModActive(name ModName)
 {
     local XComOnlineEventMgr    EventManager;
     local int                   Index;
@@ -615,7 +739,7 @@ private static final function bool IsModActive(name ModName)
     return false;
 }
 
-private static function PrintWeaponSets(string printMessage)
+static private function PrintWeaponSets(string printMessage)
 {
 	local name WeaponCat;
 	local int i;
