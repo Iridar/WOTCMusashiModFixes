@@ -45,6 +45,9 @@ tags= war of the chosen</Description>
     <Content Include="Localization\WOTCMusashiModFixes.rus">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Localization\XComGame.int">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
     <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API.uc">
