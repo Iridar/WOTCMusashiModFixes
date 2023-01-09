@@ -647,12 +647,12 @@ static private function string GetFriendlyNameForWeaponCat(const name WeaponCat)
 				return ItemTemplate.FriendlyName;
 			break;
 		case 'cannon':
-			ItemTemplate = ItemMgr.FindItemTemplate('Sword_CV');
+			ItemTemplate = ItemMgr.FindItemTemplate('Cannon_CV');
 			if (ItemTemplate != none)
 				return ItemTemplate.FriendlyName;
 			break;
 		case 'sword':
-			ItemTemplate = ItemMgr.FindItemTemplate('WristBlade_CV');
+			ItemTemplate = ItemMgr.FindItemTemplate('Sword_CV');
 			if (ItemTemplate != none)
 				return ItemTemplate.FriendlyName;
 			break;
