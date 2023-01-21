@@ -17,6 +17,7 @@ tags= war of the chosen</Description>
     <Folder Include="Src\" />
     <Folder Include="Src\ModConfigMenuAPI\" />
     <Folder Include="Src\ModConfigMenuAPI\Classes\" />
+    <Folder Include="Src\LoadoutApi_1_0_0" />
     <Folder Include="Src\WOTCMusashiModFixes\" />
     <Folder Include="Src\WOTCMusashiModFixes\Classes\" />
   </ItemGroup>
@@ -50,6 +51,12 @@ tags= war of the chosen</Description>
     </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
+    <Content Include="Src\LoadoutApi_1_0_0\LoadoutApiFactory.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LoadoutApi_1_0_0\LoadoutApiInterface.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API.uc">
       <SubType>Content</SubType>
     </Content>
@@ -109,7 +116,7 @@ tags= war of the chosen</Description>
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
-    <PropertyGroup>
+  <PropertyGroup>
     <SolutionRoot>$(MSBuildProjectDirectory)\..\</SolutionRoot>
     <ScriptsDir>$(SolutionRoot).scripts\</ScriptsDir>
     <BuildCommonRoot>$(ScriptsDir)X2ModBuildCommon\</BuildCommonRoot>

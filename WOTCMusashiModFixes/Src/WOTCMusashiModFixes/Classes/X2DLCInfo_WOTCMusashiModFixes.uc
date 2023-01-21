@@ -821,6 +821,54 @@ static event OnLoadedSavedGame()
 	}
 }
 
+// --------------------
+
+
+
+
+static function FinalizeUnitAbilitiesForInit(XComGameState_Unit UnitState, out array<AbilitySetupData> SetupDatas, optional XComGameState StartState, optional XComGameState_Player PlayerState, optional bool bMultiplayerDisplay)
+{
+	local AbilitySetupData			NewData;
+	local AbilitySetupData			SetupData;
+	local LoadoutApiInterface		LoadoutApi;
+	local X2AbilityTemplateManager	AbilityMgr;
+	local XComGameState_Item		SecondaryWeapon;
+
+	if (!IsModActive('AbilityToSlotReassignment') ||
+		!IsModActive('DualWieldMelee'))
+		return;
+	
+	foreach SetupDatas(SetupData)
+	{
+		if (SetupData.TemplateName == 'DualSlashSecondary')
+			return;
+	}
+
+	LoadoutApi = class'LoadoutApiFactory'.static.GetLoadoutApi();
+
+	if (!LoadoutApi.HasDualMeleeEquipped(UnitState, StartState))
+		return;
+
+	// If we're here, Dual Melee is active, soldier has dual melee equipped, but no secondary slash anywhere. Uh oh.
+	// Better add it before the hatch is sealed.
+
+	AbilityMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+	NewData.Template = AbilityMgr.FindAbilityTemplate('DualSlashSecondary');
+	
+	// Your mod has suffered a catastrophic failure, which means we cannot proceed with the testing.
+	if (NewData.Template == none)
+		return;
+
+	SecondaryWeapon = UnitState.GetItemInSlot(eInvSlot_SecondaryWeapon, StartState);
+	if (SecondaryWeapon == none)
+		return; // Oh, come on!
+
+	NewData.TemplateName = NewData.Template.DataName;
+	NewData.SourceWeaponRef = SecondaryWeapon.GetReference();
+
+	SetupDatas.AddItem(NewData);
+}
+
 
 // ============================================================================================================
 //			HELPERS
