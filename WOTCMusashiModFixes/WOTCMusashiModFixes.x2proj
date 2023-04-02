@@ -15,6 +15,7 @@ tags= war of the chosen</Description>
     <Folder Include="Config\Base" />
     <Folder Include="Localization" />
     <Folder Include="Src\" />
+    <Folder Include="Src\LoadoutApi_1_0_0\Classes" />
     <Folder Include="Src\ModConfigMenuAPI\" />
     <Folder Include="Src\ModConfigMenuAPI\Classes\" />
     <Folder Include="Src\LoadoutApi_1_0_0" />
@@ -51,10 +52,10 @@ tags= war of the chosen</Description>
     </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
-    <Content Include="Src\LoadoutApi_1_0_0\LoadoutApiFactory.uc">
+    <Content Include="Src\LoadoutApi_1_0_0\Classes\LoadoutApiFactory.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\LoadoutApi_1_0_0\LoadoutApiInterface.uc">
+    <Content Include="Src\LoadoutApi_1_0_0\Classes\LoadoutApiInterface.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API.uc">
