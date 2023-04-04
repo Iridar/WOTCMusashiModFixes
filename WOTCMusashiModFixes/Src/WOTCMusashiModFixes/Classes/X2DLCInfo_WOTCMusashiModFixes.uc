@@ -16,8 +16,6 @@ var private class<X2DownloadableContentInfo> DLCInfo_RPGO;
 
 var private config array<name> AbilitiesWithUpdatedLocalization;
 
-`define LLOG(msg) `LOG(GetFuncName() @ `msg, class'WOTCMusashiModFixes_Defaults'.default.VERSION_CFG > class'WOTCMusashiModFixes_MCMScreen'.default.VERSION_CFG ? class'WOTCMusashiModFixes_Defaults'.default.DEBUG_LOGGING : class'WOTCMusashiModFixes_MCMScreen'.default.DEBUG_LOGGING, 'AtSR_Fixes')
-
 `include(WOTCMusashiModFixes\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
 static event OnPostTemplatesCreated()
@@ -874,7 +872,7 @@ static function FinalizeUnitAbilitiesForInit(XComGameState_Unit UnitState, out a
 //			HELPERS
 // ------------------------------------------------------------------------------------------------------------
 
-static private final function bool IsModActive(name ModName)
+static final function bool IsModActive(name ModName)
 {
     local XComOnlineEventMgr    EventManager;
     local int                   Index;

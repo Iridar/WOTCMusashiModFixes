@@ -3,8 +3,6 @@ class X2DLCInfo_WOTCMusashiModFixes_RunFirst extends X2DownloadableContentInfo;
 // This fixes a bug with AtSR where if Launch Grenade is Mandatory, it is added just to the grenade launcher,
 // but to work properly, there must be one launch grenade entry per each non-merged grenade item, which will specify that grenade as source ammo.
 
-//`define AMLOG(msg) `LOG(GetFuncName() @ `msg, class'WOTCMusashiModFixes_Defaults'.default.VERSION_CFG > class'WOTCMusashiModFixes_MCMScreen'.default.VERSION_CFG ? class'WOTCMusashiModFixes_Defaults'.default.DEBUG_LOGGING : class'WOTCMusashiModFixes_MCMScreen'.default.DEBUG_LOGGING, 'AtSR_Fixes')
-
 static function FinalizeUnitAbilitiesForInit(XComGameState_Unit UnitState, out array<AbilitySetupData> SetupData, optional XComGameState StartState, optional XComGameState_Player PlayerState, optional bool bMultiplayerDisplay)
 {
 	local AbilitySetupData			NewData;

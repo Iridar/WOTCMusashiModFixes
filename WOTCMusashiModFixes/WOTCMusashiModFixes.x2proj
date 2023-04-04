@@ -52,6 +52,9 @@ tags= war of the chosen</Description>
     </Content>
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
+    <Content Include="Src\extra_globals.uci">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LoadoutApi_1_0_0\Classes\LoadoutApiFactory.uc">
       <SubType>Content</SubType>
     </Content>
