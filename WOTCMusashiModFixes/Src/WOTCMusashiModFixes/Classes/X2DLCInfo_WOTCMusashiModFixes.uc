@@ -48,6 +48,11 @@ static event OnPostTemplatesCreated()
 			UpdateAbilityLocalization();
 		}
 	}
+
+	if (IsModActive('DualWieldMelee'))
+	{
+		ReplaceDualWieldMeleeVisualization();
+	}
 }
 
 static private function PerformOverrideAbilities()
@@ -906,4 +911,292 @@ static private function PrintWeaponSets(string printMessage)
 		
 	}
 	`LOG("------------------------- FINISHED -----------------------------",, 'IRITEST');
+}
+
+
+
+static private function ReplaceDualWieldMeleeVisualization()
+{
+	local X2AbilityTemplateManager AbilityMgr;
+	local X2AbilityTemplate	AbilityTemplate;
+
+	AbilityMgr = class'X2AbilityTemplateManager'.static.GetAbilityTemplateManager();
+	AbilityTemplate = AbilityMgr.FindAbilityTemplate('DualSlashSecondary');
+	if (AbilityTemplate != none)
+	{
+		AbilityTemplate.BuildVisualizationFn = ApplyAdditionalDamage_BuildVisualization;
+		AbilityTemplate.MergeVisualizationFn = MergeVisualization;
+	}
+}
+
+
+static final function ApplyAdditionalDamage_BuildVisualization(XComGameState VisualizeGameState)
+{	
+	local XComGameStateVisualizationMgr					VisMgr;
+	local XComGameStateContext_Ability					AbilityContext;
+	local array<X2Action>								FindActions;
+	local X2Action										FindAction;
+	local X2Action										ChildAction;
+	local VisualizationActionMetadata					ActionMetadata;
+	local X2Action_MarkerNamed							EmptyAction;
+	local X2Action_ApplyWeaponDamageToTerrain			DamageTerrainAction;
+	
+	class'X2Ability'.static.TypicalAbility_BuildVisualization(VisualizeGameState);
+
+	VisMgr = `XCOMVISUALIZATIONMGR;
+	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+
+	VisMgr.GetNodesOfType(VisMgr.BuildVisTree, class'X2Action_ApplyWeaponDamageToTerrain', FindActions);
+
+	foreach FindActions(FindAction)
+	{
+		DamageTerrainAction = X2Action_ApplyWeaponDamageToTerrain(FindAction);
+		ActionMetadata = DamageTerrainAction.Metadata;
+
+		foreach DamageTerrainAction.ChildActions(ChildAction)
+		{
+			VisMgr.ConnectAction(ChildAction, VisMgr.BuildVisTree, false);
+		}
+
+		// Nuke the original action out of the tree.
+		EmptyAction = X2Action_MarkerNamed(class'X2Action'.static.CreateVisualizationActionClass(class'X2Action_MarkerNamed', AbilityContext));
+		EmptyAction.SetName("ReplaceDamageTerrainAction");
+		VisMgr.ReplaceNode(EmptyAction, DamageTerrainAction);
+	}
+}
+
+// Melee-Stance Additional Damage Merge Visualisation
+static final function MergeVisualization(X2Action BuildTree, out X2Action VisualizationTree)
+{
+	local XComGameStateVisualizationMgr		VisMgr;
+	local X2Action_MarkerNamed				MarkerNamed, JoinMarker, SecondJoin, FireReplace;
+	local array<X2Action>					arrActions;
+	local X2Action							Action, FirstFireAction, SecondFireAction, SpacerAction;
+	local int i;
+	local VisualizationActionMetadata		ActionMetadata;
+	local XComGameStateContext_Ability		FirstAbilityContext, SecondAbilityContext;
+	local StateObjectReference				Target;
+	local int HistoryIndexDelta;
+
+	VisMgr = `XCOMVISUALIZATIONMGR;
+
+	//	##### Acquire Context for both this Primary and Secondary Slashes, as well as their Fire Actions.
+	SecondFireAction = VisMgr.GetNodeOfType(BuildTree, class'X2Action_Fire');
+	SecondAbilityContext = XComGameStateContext_Ability(BuildTree.StateChangeContext);
+	Target = SecondAbilityContext.InputContext.PrimaryTarget;
+	
+	//	Acquire all Fire Actions that belong to the unit activating Dual Secondary Slash.
+	VisMgr.GetNodesOfType(VisualizationTree, class'X2Action_Fire', arrActions, , SecondAbilityContext.InputContext.SourceObject.ObjectID, true);
+	`LOG("MergeVisualization for: " @ SecondAbilityContext.InputContext.AbilityTemplateName @ "Activated at History Index: " @ SecondAbilityContext.DesiredVisualizationBlockIndex @ "found Fire Actions: " @ arrActions.Length,, 'DualWieldMelee');
+
+	//	If there is only one Fire Action present in the Viz Tree, that's *likely* because all other Fire Actions (including the one belonging to the ability that triggered this instance of Secondary Slash) 
+	//	have already been neutered by other Merge Vis functions, because they're not intended to visualize.
+	if (arrActions.Length == 1 && arrActions[0].StateChangeContext.AssociatedState.HistoryIndex <= SecondAbilityContext.DesiredVisualizationBlockIndex)
+	{
+		//	So we just use whatever Fire Action is present there, provided it is older or same age as Fire Action of the Secondary Slash. Otherwise, something has gone very wrong.
+		FirstFireAction = arrActions[0];
+		FirstAbilityContext = XComGameStateContext_Ability(arrActions[0].StateChangeContext);
+	}
+	else
+	{
+		//	If there are multiple Fire Actions, because of multiple abiliy activations or something like that, try to find the Fire Action with the same History Index as the fire action of the Secondary Slash
+		//	which we set when we trigger the Secondary Slash in the Event Listener.
+		foreach arrActions(Action)
+		{	
+			`LOG("Found Fire Action with index: " @ Action.StateChangeContext.AssociatedState.HistoryIndex,, 'DualWieldMelee');
+			//	Locate Fire Action with the History Index that was assigned to the Context when DualSlashSecondary was triggered.
+			if (Action.StateChangeContext.AssociatedState.HistoryIndex == SecondAbilityContext.DesiredVisualizationBlockIndex) 
+			{
+				FirstFireAction = Action;
+				FirstAbilityContext = XComGameStateContext_Ability(Action.StateChangeContext);
+
+				`LOG("History Index match found! Triggering Ability: " @ FirstAbilityContext.InputContext.AbilityTemplateName @ "No Primary Target in this Fire Action?" @ X2Action_Fire(Action).PrimaryTargetID == 0,, 'DualWieldMelee');
+
+				//	An ability can potentially have multiple Fire Actions with the same History Index, so we also check that this Fire Action has been activated against the same target as DualSlashSecondary.
+				//  Mr. Nice: if the PrimaryTargetID is zero, then just use the context primary instead
+				if (SecondAbilityContext.InputContext.PrimaryTarget.ObjectID == (X2Action_Fire(Action).PrimaryTargetID == 0 ? XComGameStateContext_Ability(Action.StateChangeContext).InputContext.PrimaryTarget.ObjectID : X2Action_Fire(Action).PrimaryTargetID))
+				{
+					//	Found Fire Action with correct History Index and correct Target.
+					`LOG("Found Fire Action with correct History Index and correct Target.",, 'DualWieldMelee');
+					break;
+				}
+			}
+		}
+	}
+
+	//	First attempt to acquire Fire Action has failed. This can happen if the triggering ability doesn't have a Fire Action, e.g. if it was already neutered by that ability's Merge Vis,
+	//	and there are more than one Fire Actions in the Viz tree due to multiple ability activations, so it wouldn't be right to settle for just any Fire Action. We have to find the Fire Action that is 
+	//	older than Secondary Slash's Fire Action, but still the closest to it.
+	if (FirstFireAction == none)
+	{
+		`LOG("First attempt to acquire Fire Action has failed.",, 'DualWieldMelee');
+
+		//	Cycle through Fire Actions once again.
+		foreach arrActions(Action)
+		{
+			//	This Fire Action is older or same age as the Secondary Slash's Fire Action
+			if (Action.StateChangeContext.AssociatedState.HistoryIndex <= SecondAbilityContext.DesiredVisualizationBlockIndex &&
+			HistoryIndexDelta < SecondAbilityContext.DesiredVisualizationBlockIndex - Action.StateChangeContext.AssociatedState.HistoryIndex)
+			{	//	and the difference in History Indices is larger than for the Fire Action that we have found previously, if any
+
+				FirstFireAction = Action;
+				FirstAbilityContext = XComGameStateContext_Ability(Action.StateChangeContext);
+				HistoryIndexDelta = SecondAbilityContext.DesiredVisualizationBlockIndex - Action.StateChangeContext.AssociatedState.HistoryIndex;
+
+				`LOG("Settled for Fire Action with History Index: " @ Action.StateChangeContext.AssociatedState.HistoryIndex @ "Delta: " @ HistoryIndexDelta,, 'DualWieldMelee');
+				//	No break on purpose! We want the cycle to sift through all Fire Actions in the tree.
+			}
+		}
+	}
+	
+	//	Final failsafe.
+	//Mr. Nice: If this happens who knows what's going on? Just keep VisMgr happy with the most generic merge...
+	if (FirstFireAction == none || SecondFireAction == none)
+	{
+		`log("Dual Wielded Melee merge visualization failed!" @ FirstFireAction == none @ SecondFireAction == none,, 'DualWieldMelee');
+		XComGameStateContext_Ability(BuildTree.StateChangeContext).SuperMergeIntoVisualizationTree(BuildTree, VisualizationTree);
+		return;
+	}
+	//	##### -------------------
+
+	//	#### Acquire Join Markers
+	VisMgr.GetNodesOfType(VisualizationTree, class'X2Action_MarkerNamed', arrActions, , , true);
+	for (i = 0; i < arrActions.Length; ++i)
+	{
+		MarkerNamed = X2Action_MarkerNamed(arrActions[i]);
+		if (MarkerNamed.MarkerName == 'Join' && MarkerNamed.StateChangeContext.AssociatedState.HistoryIndex == SecondAbilityContext.DesiredVisualizationBlockIndex)
+		{
+			JoinMarker = MarkerNamed;
+			break;
+		}
+	}
+
+	//`assert(JoinMarker != none);
+	
+	VisMgr.GetNodesOfType(BuildTree, class'X2Action_MarkerNamed', arrActions, , , true);
+	for (i = 0; i < arrActions.Length; ++i)
+	{
+		MarkerNamed = X2Action_MarkerNamed(arrActions[i]);
+		if (MarkerNamed.MarkerName == 'Join')
+		{
+			SecondJoin = MarkerNamed;
+		}
+	}
+	//	##### -------------------
+
+	//Mr. Nice: If Second hit misses, animate first hit. Otherwise animate second hit.
+	//Means that if we kill on the second shot, we correctly get the death anim
+	//Well, that was the theory, but hiding hits is hard, and if you hide the first one, you don't get the projectile blood.
+
+	if(!X2Action_Fire(FirstFireAction).bWasHit) // requires unprivating: var /*private*/ ProtectedWrite bool bWasHit; in X2Action_Fire
+	{
+		VisMgr.GetNodesOfType(BuildTree, class'X2Action_ApplyWeaponDamageToUnit', arrActions,, Target.ObjectID);
+		foreach arrActions(Action)
+		{
+			if(Action.ParentActions[0] == SecondFireAction)
+			{
+				X2Action_ApplyWeaponDamageToUnit(Action).bPlayDamageAnim = false;
+			}
+		}
+	}
+	else
+	{
+		VisMgr.GetNodesOfType(VisualizationTree, class'X2Action_ApplyWeaponDamageToUnit', arrActions,, Target.ObjectID);
+		if (IsContextMiss(FirstAbilityContext))
+		{
+			foreach arrActions(Action)
+			{
+				if(Action.ParentActions[0] == FirstFireAction)
+				{
+					X2Action_ApplyWeaponDamageToUnit(Action).bPlayDamageAnim = false;
+				}
+			}
+		}
+		
+		//Mr. Nice: This makes sure you can see the counter attack, whether the second shot kills them or not
+		else if(FirstAbilityContext.ResultContext.HitResult == eHit_CounterAttack)
+		{
+			foreach arrActions(Action)
+			{
+				if (Action.ParentActions[0] == FirstFireAction)
+				{
+					if(XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(Target.ObjectID,, SecondAbilityContext.AssociatedState.HistoryIndex)).IsDead())
+					{
+						//Mr. Nice: If the second hit kills, stil want to show the counter animation before the unit animates its death
+						SpacerAction = Action;
+					}
+					else
+					{
+						//Mr. Nice: If the second hit does not kill, want the counter animation, not the flinch animation, to get priority
+						//Spacer both keeps the sets of damageotunit's from being siblings if both miss,
+						//and helpfully makes sure you see the counter anim, not the flinch anim when you have a counter & hit result
+						ActionMetaData = FirstFireAction.Metadata;
+						SpacerAction = class'X2Action_ApplyDamageSpacer'.static.AddToVisualizationTree(ActionMetadata, FirstAbilityContext,, FirstFireAction);
+						VisMgr.DisconnectAction(Action);
+						VisMgr.ConnectAction(Action, VisualizationTree,, SpacerAction);
+						SpacerAction = FirstFireAction;
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	//If the second shot has a join created, then just slot it in above the first shots join
+	if (SecondJoin != none)
+	{
+		VisMgr.ConnectAction(SecondJoin, VisualizationTree,,, JoinMarker.ParentActions);
+		if (JoinMarker != none) VisMgr.ConnectAction(JoinMarker, BuildTree,, SecondJoin);
+	}
+	//If the second shot does not have a join, then connect the leaf nodes to the first shots join
+	else if (JoinMarker != none) 
+	{
+		VisMgr.GetAllLeafNodes(BuildTree, arrActions);
+		VisMgr.ConnectAction(JoinMarker,BuildTree,,, arrActions);
+	}
+	//Mr. Nice, ok, want to connect children of secondfireaction, to firstfireaction
+	arrActions = SecondFireAction.ChildActions;
+	//If first hit was countered, then the attachment point for second hit applydamagetounit will have been set
+	//Otherwise, create a new SpacerAction for them
+	if (SpacerAction == none)
+	{
+		ActionMetaData = SecondFireAction.Metadata;
+		SpacerAction = class'X2Action_ApplyDamageSpacer'.static.AddToVisualizationTree(ActionMetadata, SecondAbilityContext,, FirstFireAction);
+	}
+
+	foreach arrActions(Action)
+	{
+		VisMgr.ConnectAction(Action, VisualizationTree,, X2Action_ApplyWeaponDamageToUnit(Action) != none ? SpacerAction : FirstFireAction);
+	}
+	//For correct counter attack animations, need to be able to trace from BuildTree down to the second shots apply damages, without
+	//encountering the first shot's applydamages. So swap out the SecondFireAction for a marker, just to keep BuildTree traceable.
+	FireReplace = X2Action_MarkerNamed(class'X2Action'.static.CreateVisualizationActionClass(class'X2Action_MarkerNamed', SecondAbilityContext));
+	FireReplace.SetName("DualSlashSecondary_FireActionStub");	//	Please don't change the Marker Name, other mods may rely on this.
+	VisMgr.ReplaceNode(FireReplace, SecondFireAction);	
+
+	//Mr. Nice we have swapped out the SecondFireAction,
+	//So can destroy it now without "stranding" any other actions
+	VisMgr.DestroyAction(SecondFireAction);
+}
+
+//Mr. Nice: Just AbilityContext.IsResultContextHit() isn't good enough, since Unload multitargets
+//The primary target, so have to check the multitarget results too
+//Also, for animation purposes we want to treat a counterattack result as a hit, not miss
+static private function bool IsContextMiss(XComGameStateContext_Ability AbilityContext)
+{
+	local int MultiIndex;
+
+	if (AbilityContext.IsResultContextHit() || AbilityContext.ResultContext.HitResult==eHit_CounterAttack)
+	{
+		return false;
+	}
+		
+	for (MultiIndex = 0; MultiIndex < AbilityContext.InputContext.MultiTargets.Length; ++MultiIndex)
+	{
+		if (AbilityContext.IsResultContextMultiHit(MultiIndex))
+		{
+			return false;
+		}
+	}
+	return true;
 }
